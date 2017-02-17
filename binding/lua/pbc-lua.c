@@ -28,6 +28,7 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #if LUA_VERSION_NUM == 501
 
@@ -337,11 +338,10 @@ _wmessage_int64(lua_State *L) {
 	case LUA_TSTRING : {
 		size_t len = 0;
 		const char * number = lua_tolstring(L,3,&len);
-		if (len !=8 ) {
-			return luaL_error(L,"Need an 8 length string for int64");
-		}
-		const uint32_t * v = (const uint32_t *) number;
-		pbc_wmessage_integer(m, key, v[0] , v[1]);
+		int64_t v64 = 0;
+		if(len > 0)
+			v64 = atoll(number);
+		pbc_wmessage_integer(m, key, (uint32_t)v64 , (uint32_t)(v64>>32));
 		break;
 	}
 	case LUA_TLIGHTUSERDATA : {
@@ -360,9 +360,25 @@ static int
 _wmessage_int52(lua_State *L) {
 	struct pbc_wmessage * m = (struct pbc_wmessage *)checkuserdata(L,1);
 	const char * key = luaL_checkstring(L,2);
-	int64_t number = (int64_t)(luaL_checknumber(L,3));
-	uint32_t hi = (uint32_t)(number >> 32);
-	pbc_wmessage_integer(m, key, (uint32_t)number, hi);
+	switch (lua_type(L,3)) {
+	case LUA_TSTRING : {
+		size_t len = 0;
+		const char * number = lua_tolstring(L,3,&len);
+		int64_t v64 = 0;
+		if(len > 0)
+			v64 = atoll(number);
+		pbc_wmessage_integer(m, key, (uint32_t)v64 , (uint32_t)(v64>>32));
+		break;
+	}
+	case LUA_TNUMBER : {
+		int64_t number = (int64_t)(luaL_checknumber(L,3));
+		uint32_t hi = (uint32_t)(number >> 32);
+		pbc_wmessage_integer(m, key, (uint32_t)number, hi);
+		break;
+	}
+	default :
+		return luaL_error(L, "Need an int64 type");
+	}
 
 	return 0;
 }
@@ -371,13 +387,29 @@ static int
 _wmessage_uint52(lua_State *L) {
 	struct pbc_wmessage * m = (struct pbc_wmessage *)checkuserdata(L,1);
 	const char * key = luaL_checkstring(L,2);
-	lua_Number v = (luaL_checknumber(L,3));
-	if (v < 0) {
-		return luaL_error(L, "negative number : %f passed to unsigned field",v);
+	switch (lua_type(L,3)) {
+	case LUA_TSTRING : {
+		size_t len = 0;
+		const char * number = lua_tolstring(L,3,&len);
+		int64_t v64 = 0;
+		if(len > 0)
+		{
+			v64 = atoll(number);
+			if(v64 < 0)
+				return luaL_error(L, "negative number : %s passed to unsigned field", number);
+		}
+		pbc_wmessage_integer(m, key, (uint32_t)v64 , (uint32_t)(v64>>32));
+		break;
 	}
-	uint64_t number = (uint64_t)v;
-	uint32_t hi = (uint32_t)(number >> 32);
-	pbc_wmessage_integer(m, key, (uint32_t)number, hi);
+	case LUA_TNUMBER : {
+		int64_t number = (int64_t)(luaL_checknumber(L,3));
+		uint32_t hi = (uint32_t)(number >> 32);
+		pbc_wmessage_integer(m, key, (uint32_t)number, hi);
+		break;
+	}
+	default :
+		return luaL_error(L, "Need an int64 type");
+	}
 
 	return 0;
 }
@@ -921,7 +953,9 @@ push_value(lua_State *L, int type, const char * type_name, union pbc_value *v) {
 		break;
 	case PBC_INT64: {
 		uint64_t v64 = (uint64_t)(v->i.hi) << 32 | (uint64_t)(v->i.low);
-		lua_pushnumber(L,(lua_Number)(int64_t)v64);
+		char buffer[32] = {0};
+		sprintf(buffer, "%ld", v64);
+		lua_pushstring(L, buffer);
 		break;
 	}
 	case PBC_UINT: {

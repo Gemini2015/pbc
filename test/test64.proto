@@ -1,0 +1,10 @@
+// See README.txt for information and build instructions.
+
+message Person {
+  required int64		v_int64 = 1;
+  required uint64		v_uint64 = 2;
+  required sint64		v_sint64 = 3;
+  required fixed64		v_fixed64 = 4;
+  required sfixed64 	v_sfixed64 = 5;
+}
+
