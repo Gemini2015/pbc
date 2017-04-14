@@ -945,22 +945,36 @@ push_value(lua_State *L, int type, const char * type_name, union pbc_value *v) {
 		lua_pushlstring(L, (const char *)v->s.buffer , v->s.len);
 		lua_call(L, 2 , 1);
 		break;
-	case PBC_FIXED64:
-		lua_pushlstring(L, (const char *)&(v->i), 8);
+	case PBC_FIXED64: {
+		uint64_t v64 = (uint64_t)(v->i.hi) << 32 | (uint64_t)(v->i.low);
+		char buffer[32] = {0};
+		sprintf(buffer, "%lld", v64);
+		lua_pushstring(L, buffer);
 		break;
+	}
 	case PBC_FIXED32:
 		lua_pushlightuserdata(L,(void *)(intptr_t)v->i.low);
 		break;
 	case PBC_INT64: {
 		uint64_t v64 = (uint64_t)(v->i.hi) << 32 | (uint64_t)(v->i.low);
 		char buffer[32] = {0};
-		sprintf(buffer, "%ld", v64);
+		sprintf(buffer, "%lld", v64);
 		lua_pushstring(L, buffer);
 		break;
 	}
 	case PBC_UINT: {
 		uint64_t v64 = (uint64_t)(v->i.hi) << 32 | (uint64_t)(v->i.low);
-		lua_pushnumber(L,(lua_Number)v64);
+		// TODO
+		if(v64 > 0xffffffff)
+		{
+			char buffer[32] = {0};
+			sprintf(buffer, "%llu", v64);
+			lua_pushstring(L, buffer);
+		}
+		else
+		{
+			lua_pushnumber(L,(lua_Number)v64);
+		}
 		break;
 	}
 	default:

@@ -26,6 +26,6 @@ file:close()
 decode = protobuf.decode("Person" , code)
 
 print('decode')
-for k, v in pairs(data) do
+for k, v in pairs(decode) do
 	print('k ' .. k .. ' value ' .. v .. ' type ' .. type(v))
 end
