@@ -258,6 +258,7 @@ local _writer = {
 	int32 = c._wmessage_int32,
 	int52 = c._wmessage_int52,
 	uint52 = c._wmessage_uint52,
+	uint64 = c._wmessage_uint64,
 }
 
 function _writer:bool(k,v)
@@ -324,6 +325,12 @@ function _writer:uint52_repeated(k,v)
 	end
 end
 
+function _writer:uint64_repeated(k,v)
+	for _,v in ipairs(v) do
+		c._wmessage_uint64(self,k,v)
+	end
+end
+
 _writer[1] = function(msg) return _writer.int end
 _writer[2] = function(msg) return _writer.real end
 _writer[3] = function(msg) return _writer.bool end
@@ -340,6 +347,7 @@ _writer[8] = function(msg) return _writer.int32 end
 _writer[9] = _writer[5]
 _writer[10] = function(msg) return _writer.int52 end
 _writer[11] = function(msg) return _writer.uint52 end
+_writer[13] = function(msg) return _writer.uint64 end
 
 _writer[128+1] = function(msg) return _writer.int_repeated end
 _writer[128+2] = function(msg) return _writer.real_repeated end
@@ -357,6 +365,7 @@ _writer[128+8] = function(msg) return _writer.int32_repeated end
 _writer[128+9] = _writer[128+5]
 _writer[128+10] = function(msg) return _writer.int52_repeated end
 _writer[128+11] = function(msg) return _writer.uint52_repeated end
+_writer[128+13] = function(msg) return _writer.uint64_repeated end
 
 local _encode_type_meta = {}
 
