@@ -714,7 +714,8 @@ push_value(lua_State *L, int type, const char * type_name, union pbc_value *v) {
 		lua_call(L, 2 , 1);
 		break;
 	case PBC_FIXED64:
-	case PBC_UINT: 
+	case PBC_UINT:
+	case PBC_UINT64: 
 	case PBC_INT64: {
 		uint64_t v64 = (uint64_t)(v->i.hi) << 32 | (uint64_t)(v->i.low);
 		lua_pushinteger(L,v64);

@@ -19,6 +19,7 @@
 #define PBC_INT64 10
 #define PBC_UINT 11
 #define PBC_UNKNOWN 12
+#define PBC_UINT64 13
 #define PBC_REPEATED 128
 
 #ifdef __cplusplus

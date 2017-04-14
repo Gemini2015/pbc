@@ -964,17 +964,14 @@ push_value(lua_State *L, int type, const char * type_name, union pbc_value *v) {
 	}
 	case PBC_UINT: {
 		uint64_t v64 = (uint64_t)(v->i.hi) << 32 | (uint64_t)(v->i.low);
-		// TODO
-		if(v64 > 0xffffffff)
-		{
-			char buffer[32] = {0};
-			sprintf(buffer, "%llu", v64);
-			lua_pushstring(L, buffer);
-		}
-		else
-		{
-			lua_pushnumber(L,(lua_Number)v64);
-		}
+		lua_pushnumber(L,(lua_Number)v64);
+		break;
+	}
+	case PBC_UINT64: {
+		uint64_t v64 = (uint64_t)(v->i.hi) << 32 | (uint64_t)(v->i.low);
+		char buffer[32] = {0};
+		sprintf(buffer, "%llu", v64);
+		lua_pushstring(L, buffer);
 		break;
 	}
 	default:

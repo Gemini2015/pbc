@@ -50,6 +50,9 @@ decode_all(void *ud , int type, const char * typename , union pbc_value *v, int 
 	case PBC_UINT:
 		printf("%u\n",v->i.low);
 		break;
+	case PBC_UINT64:
+		printf("0x%x%08x\n",v->i.hi, v->i.low);
+		break;
 	default:
 		printf("!!! %d\n", type);
 		break;
